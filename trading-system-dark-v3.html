@@ -1352,6 +1352,91 @@
             }
         }
 
+        // 编辑交易
+        function editTrade(id) {
+            const trade = trades.find(t => t.id === id);
+            if (!trade) return;
+            
+            // 填充表单
+            document.getElementById('stockName').value = trade.name;
+            document.getElementById('buyPrice').value = trade.buyPrice;
+            document.getElementById('stopLoss').value = trade.stopLoss;
+            document.getElementById('actualTargetPrice').value = trade.actualTargetPrice || '';
+            document.getElementById('profitLossAmount').value = trade.profitLossAmount || '';
+            document.getElementById('investAmount').value = trade.cost;
+            
+            // 滚动到表单
+            document.querySelector('.trade-form').scrollIntoView({ behavior: 'smooth' });
+            
+            // 临时保存正在编辑的交易ID
+            window.editingTradeId = id;
+            
+            // 更改提交按钮文本
+            const submitBtn = document.querySelector('button[onclick="submitTrade()"]');
+            submitBtn.textContent = '💾 保存修改';
+            submitBtn.onclick = saveEditedTrade;
+        }
+
+        // 保存编辑的交易
+        function saveEditedTrade() {
+            const name = document.getElementById('stockName').value;
+            const buyPrice = parseFloat(document.getElementById('buyPrice').value);
+            const stopLoss = parseFloat(document.getElementById('stopLoss').value);
+            const actualTargetPrice = parseFloat(document.getElementById('actualTargetPrice').value) || 0;
+            const profitLossAmount = parseFloat(document.getElementById('profitLossAmount').value) || 0;
+            const amount = parseFloat(document.getElementById('investAmount').value);
+            
+            if (!name || !buyPrice || !stopLoss || !amount) {
+                alert('⚠️ 请填写完整信息！');
+                return;
+            }
+            
+            const tradeIndex = trades.findIndex(t => t.id === window.editingTradeId);
+            if (tradeIndex === -1) {
+                alert('❌ 未找到要编辑的交易记录');
+                return;
+            }
+            
+            const shares = Math.floor(amount / buyPrice);
+            const currentCapital = getCurrentCapital();
+            const positionPct = ((amount / currentCapital) * 100).toFixed(2);
+            
+            // 更新交易记录
+            trades[tradeIndex] = {
+                ...trades[tradeIndex],
+                name: name,
+                buyPrice: buyPrice,
+                shares: shares,
+                cost: amount,
+                stopLoss: stopLoss,
+                actualTargetPrice: actualTargetPrice,
+                profitLossAmount: profitLossAmount,
+                positionPct: positionPct
+            };
+            
+            saveTrades();
+            updateDisplay();
+            updateChart();
+            
+            // 重置表单和按钮
+            document.getElementById('stockName').value = '';
+            document.getElementById('buyPrice').value = '';
+            document.getElementById('stopLoss').value = '';
+            document.getElementById('actualTargetPrice').value = '';
+            document.getElementById('profitLossAmount').value = '';
+            document.getElementById('investAmount').value = '';
+            document.getElementById('tradeResult').style.display = 'none';
+            
+            // 恢复提交按钮
+            const submitBtn = document.querySelector('button[onclick^="saveEditedTrade"]');
+            submitBtn.textContent = '✅ 提交交易计划';
+            submitBtn.onclick = submitTrade;
+            
+            delete window.editingTradeId;
+            
+            alert('✅ 交易记录已更新！');
+        }
+
         // 清空所有交易
         function clearAllTrades() {
             if (confirm('⚠️ 确定要清空所有交易记录吗？此操作不可恢复！')) {
@@ -1361,6 +1446,91 @@
                 updateChart();
                 alert('✅ 已清空所有交易记录');
             }
+        }
+
+        // 编辑交易
+        function editTrade(id) {
+            const trade = trades.find(t => t.id === id);
+            if (!trade) return;
+            
+            // 填充表单
+            document.getElementById('stockName').value = trade.name;
+            document.getElementById('buyPrice').value = trade.buyPrice;
+            document.getElementById('stopLoss').value = trade.stopLoss;
+            document.getElementById('actualTargetPrice').value = trade.actualTargetPrice || '';
+            document.getElementById('profitLossAmount').value = trade.profitLossAmount || '';
+            document.getElementById('investAmount').value = trade.cost;
+            
+            // 滚动到表单
+            document.querySelector('.trade-form').scrollIntoView({ behavior: 'smooth' });
+            
+            // 临时保存正在编辑的交易ID
+            window.editingTradeId = id;
+            
+            // 更改提交按钮文本
+            const submitBtn = document.querySelector('button[onclick="submitTrade()"]');
+            submitBtn.textContent = '💾 保存修改';
+            submitBtn.onclick = saveEditedTrade;
+        }
+
+        // 保存编辑的交易
+        function saveEditedTrade() {
+            const name = document.getElementById('stockName').value;
+            const buyPrice = parseFloat(document.getElementById('buyPrice').value);
+            const stopLoss = parseFloat(document.getElementById('stopLoss').value);
+            const actualTargetPrice = parseFloat(document.getElementById('actualTargetPrice').value) || 0;
+            const profitLossAmount = parseFloat(document.getElementById('profitLossAmount').value) || 0;
+            const amount = parseFloat(document.getElementById('investAmount').value);
+            
+            if (!name || !buyPrice || !stopLoss || !amount) {
+                alert('⚠️ 请填写完整信息！');
+                return;
+            }
+            
+            const tradeIndex = trades.findIndex(t => t.id === window.editingTradeId);
+            if (tradeIndex === -1) {
+                alert('❌ 未找到要编辑的交易记录');
+                return;
+            }
+            
+            const shares = Math.floor(amount / buyPrice);
+            const currentCapital = getCurrentCapital();
+            const positionPct = ((amount / currentCapital) * 100).toFixed(2);
+            
+            // 更新交易记录
+            trades[tradeIndex] = {
+                ...trades[tradeIndex],
+                name: name,
+                buyPrice: buyPrice,
+                shares: shares,
+                cost: amount,
+                stopLoss: stopLoss,
+                actualTargetPrice: actualTargetPrice,
+                profitLossAmount: profitLossAmount,
+                positionPct: positionPct
+            };
+            
+            saveTrades();
+            updateDisplay();
+            updateChart();
+            
+            // 重置表单和按钮
+            document.getElementById('stockName').value = '';
+            document.getElementById('buyPrice').value = '';
+            document.getElementById('stopLoss').value = '';
+            document.getElementById('actualTargetPrice').value = '';
+            document.getElementById('profitLossAmount').value = '';
+            document.getElementById('investAmount').value = '';
+            document.getElementById('tradeResult').style.display = 'none';
+            
+            // 恢复提交按钮
+            const submitBtn = document.querySelector('button[onclick^="saveEditedTrade"]');
+            submitBtn.textContent = '✅ 提交交易计划';
+            submitBtn.onclick = submitTrade;
+            
+            delete window.editingTradeId;
+            
+            alert('✅ 交易记录已更新！');
         }
 
         function init() {
@@ -1588,6 +1758,9 @@
                     : ((trade.currentPrice - trade.buyPrice) / trade.buyPrice * 100).toFixed(2);
 
                 const row = document.createElement('tr');
+                row.style.cursor = 'pointer';
+                row.ondblclick = () => editTrade(trade.id);
+                row.title = '双击编辑此交易';
                 row.innerHTML = `
                     <td>${trade.date}</td>
                     <td>${trade.code}</td>
@@ -1615,6 +1788,7 @@
                     <td>
                         ${trade.status === 'holding' 
                             ? `<button class="btn btn-small" onclick="sellTrade(${trade.id})">卖出</button>
+                                <button class="btn btn-small" onclick="editTrade(${trade.id})" style="margin-left: 5px;">编辑</button>
                                 <button class="btn btn-danger" onclick="deleteTrade(${trade.id})" style="margin-left: 5px;">删除</button>`
                             : `<span style="color: var(--accent-green);">已卖出</span>`}
                     </td>
