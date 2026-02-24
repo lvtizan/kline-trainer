@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老冯稳定盈利交易系统 | 暗黑版</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-card: #21262d;
+            --bg-input: #0d1117;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --border-color: #30363d;
+            
+            /* 柔和配色 */
+            --accent-green: #3fb950;
+            --accent-blue: #58a6ff;
+            --accent-purple: #a371f7;
+            --accent-red: #f85149;
+            --accent-yellow: #d29922;
+            --accent-orange: #db6d28;
+            --accent-cyan: #39c5cf;
+            
+            --glow-green: 0 0 12px rgba(63, 185, 80, 0.15);
+            --glow-blue: 0 0 12px rgba(88, 166, 255, 0.15);
+            
+            /* 表格配色 */
+            --table-header-bg: #161b22;
+            --table-header-text: #c9d1d9;
+            --table-border: #21262d;
+            --table-hover: #22272e;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 头部 */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px 20px;
+            background: linear-gradient(135deg, rgba(63, 185, 80, 0.08) 0%, rgba(88, 166, 255, 0.08) 100%);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 0.95em;
+            letter-spacing: 1px;
+        }
+
+        /* 起始本金编辑 */
+        .capital-edit {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 12px 20px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .capital-edit label {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+
+        .capital-edit input {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--accent-green);
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: 600;
+            width: 150px;
+            text-align: center;
+            margin: 0;
+        }
+
+        .capital-edit input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            box-shadow: var(--glow-green);
+        }
+
+        /* 卡片 */
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            max-width: 1440px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .card h2 {
+            color: var(--accent-green);
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: 600;
+        }
+
+        .positive {
+            color: var(--accent-green);
+        }
+
+        .negative {
+            color: var(--accent-red);
+        }
+
+        /* 进度条 */
+        .progress-container {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-label {
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+
+        .progress-bar {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            height: 32px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan));
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg-primary);
+            font-weight: 600;
+            font-size: 1em;
+            transition: width 0.3s ease;
+        }
+
+        /* 核心规则 - 四列布局 */
+        .rules-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        @media (max-width: 1200px) {
+            .rules-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .rules-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .rule-box {
+            background: var(--bg-secondary);
+            padding: 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .rule-box h3 {
+            color: var(--accent-blue);
+            margin-bottom: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .rule-item {
+            margin-bottom: 10px;
+            padding-left: 18px;
+            position: relative;
+            color: var(--text-primary);
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .rule-item:before {
+            content: "▹";
+            position: absolute;
+            left: 3px;
+            color: var(--accent-green);
+        }
+
+        .rule-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .highlight {
+            background: rgba(210, 153, 34, 0.1);
+            border: 1px solid var(--accent-yellow);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-size: 0.9em;
+        }
+
+        .highlight strong {
+            color: var(--accent-yellow);
+        }
+
+        /* 交易表单 */
+        .trade-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .trade-form label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.95em;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.2s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: var(--glow-blue);
+        }
+
+        input[readonly] {
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+        }
+
+        /* 按钮 */
+        .btn {
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+            color: var(--bg-primary);
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--glow-green);
+        }
+
+        .btn-small {
+            padding: 6px 15px;
+            font-size: 0.85em;
+        }
+
+        .btn-danger {
+            background: var(--accent-red);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 0 12px rgba(248, 81, 73, 0.3);
+        }
+
+        /* 表格 */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-secondary);
+        }
+
+        th {
+            background: var(--table-header-bg);
+            color: var(--table-header-text);
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--table-border);
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--table-border);
+            color: var(--text-primary);
+            font-size: 0.9em;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: var(--table-hover);
+        }
+
+        td input {
+            width: 80px;
+            padding: 6px 8px;
+            text-align: center;
+        }
+
+        /* 检查清单 - 两列 */
+        .checklist {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .checklist {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .checklist-item:hover {
+            border-color: var(--accent-green);
+        }
+
+        .checklist-item input {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            margin-right: 12px;
+        }
+
+        .checklist-item label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .checklist-item.completed {
+            opacity: 0.4;
+            text-decoration: line-through;
+        }
+
+        /* 提示框 */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            border-left: 4px solid;
+            margin-bottom: 15px;
+        }
+
+        .alert-success {
+            background: rgba(63, 185, 80, 0.1);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .alert-warning {
+            background: rgba(210, 153, 34, 0.1);
+            border-color: var(--accent-yellow);
+            color: var(--accent-yellow);
+        }
+
+        .alert-danger {
+            background: rgba(248, 81, 73, 0.1);
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-content h3 {
+            color: var(--accent-blue);
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .modal-content textarea {
+            width: 100%;
+            min-height: 120px;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            resize: vertical;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* 存储提示 */
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            text-align: center;
+            margin-top: 10px;
+            padding: 0;
+            background: none;
+            border: none;
+        }
+
+        .storage-info {
+            background: rgba(63, 185, 80, 0.08);
+            border: 1px solid var(--accent-green);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.85em;
+            color: var(--accent-green);
+            text-align: center;
+        }
+
+        /* HH形态总分结构样式 */
+        .hh-main-title {
+            background: linear-gradient(135deg, rgba(63, 185, 80, 0.15), rgba(88, 166, 255, 0.15));
+            border: 2px solid var(--accent-green);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .hh-main-title h2 {
+            color: var(--accent-green);
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            justify-content: center;
+        }
+
+        .hh-main-description {
+            color: var(--text-primary);
+            font-size: 1em;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .hh-main-description strong {
+            color: var(--accent-yellow);
+        }
+
+        .hh-warning-box {
+            background: rgba(248, 81, 73, 0.1);
+            border: 1px solid var(--accent-red);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.95em;
+        }
+
+        .hh-warning-box strong {
+            color: var(--accent-red);
+        }
+
+        .hh-subsection {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(88, 166, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(88, 166, 255, 0.3);
+            min-height: 280px;
+}
+
+        .hh-subsection h3 {
+            color: var(--accent-blue);
+            font-size: 1.1em;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(88, 166, 255, 0.3);
+        }
+
+        .hh-subsection .rule-item {
+            margin-bottom: 8px;
+        }
+
+        .hh-application {
+            margin-top: 20px;
+            padding: 18px;
+            background: rgba(210, 153, 34, 0.1);
+            border: 2px solid var(--accent-yellow);
+            border-radius: 12px;
+        }
+
+        .hh-application h3 {
+            color: var(--accent-yellow);
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+    
+        /* 交易计算器样式 */
+        .trade-calculation-result {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid var(--accent-blue);
+        }
+        .calculation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        .calc-item {
+            background: var(--bg-primary);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .calc-label {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            margin-bottom: 8px;
+        }
+        .calc-value {
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+        .calc-value.positive {
+            color: var(--accent-green);
+        }
+        .calc-value.negative {
+            color: var(--accent-red);
+        }
+        .calculation-warning {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.95em;
+        }
+        .calculation-warning.warning {
+            background: rgba(210, 153, 34, 0.1);
+            border: 1px solid var(--accent-yellow);
+            color: var(--accent-yellow);
+        }
+        .calculation-warning.success {
+            background: rgba(63, 185, 80, 0.1);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+        }
+        .calculation-warning.danger {
+            background: rgba(248, 81, 73, 0.1);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>⚡ 老冯稳定盈利交易系统 ⚡</h1>
+            <p>保守方案 | 周收益3.5% | 高胜率形态 | 卖出≥2R</p>
+        </div>
+
+        <!-- 1. 核心交易规则 -->
+        <div class="card">
+            <h2>📜 核心交易规则</h2>
+            
+            <div class="rules-grid">
+                <div class="rule-box">
+                    <h3>💰 资金管理</h3>
+                    <div class="rule-item">单笔仓位：10-12.5%</div>
+                    <div class="rule-item">止损幅度：-8%</div>
+                    <div class="rule-item">单笔风险：≤1%</div>
+                    <div class="rule-item">同时持仓：4-6只</div>
+                    <div class="rule-item">总仓位：50-75%</div>
+                </div>
+
+                <div class="rule-box">
+                    <h3>📊 选股标准</h3>
+                    <div class="rule-item">成交额：>10亿</div>
+                    <div class="rule-item">优先：20cm个股</div>
+                    <div class="rule-item">热门板块前排</div>
+                    <div class="rule-item">流通市值：50-200亿</div>
+                    <div class="rule-item">观察期：≥3天</div>
+                </div>
+
+                <div class="rule-box">
+                    <h3>🎯 买入策略</h3>
+                    <div class="rule-item">HH买点：突破昨日高点</div>
+                    <div class="rule-item">盘中买入：确定性优先</div>
+                    <div class="rule-item">快速判断（30秒）</div>
+                    <div class="rule-item">板块上涨 ✓</div>
+                    <div class="rule-item">个股强势 ✓</div>
+                </div>
+
+                <div class="rule-box">
+                    <h3>📤 卖出策略</h3>
+                    <div class="rule-item">目标：≥2R（2倍风险）</div>
+                    <div class="rule-item">+1%：关注止盈</div>
+                    <div class="rule-item">+2%：卖出一半</div>
+                    <div class="rule-item">+3%：全部止盈</div>
+                    <div class="highlight">
+                        <strong>保守策略：</strong><br>
+                        小赚（1-2%）+ 高胜率 + ≥2R止盈
+                    </div>
+                </div>
+            
+                <div class="rule-box">
+                    <h3>🎯 三位一体（核心思想）</h3>
+                    <div class="rule-item"><strong>账户：</strong>是否赚钱？锁定利润？可调节仓位？</div>
+                    <div class="rule-item"><strong>仓位：</strong>当前总仓位？风险敞口？安全带？</div>
+                    <div class="rule-item"><strong>个股：</strong>形态标准？买点明确？盈亏比？</div>
+                    <div class="rule-item"><strong>⚠️ 核心法则：</strong>所有规则必须匹配这三方面</div>
+                    <div class="highlight">
+                        <strong>三位一体训练越多，盘中控制力越强！</strong><br>
+                        ✓ 账户状态决定买入胆量<br>
+                        ✓ 仓位管理决定安全程度<br>
+                        ✓ 个股质量决定成功概率<br>
+                        → 眼界高了，格局也就打开了
+                    </div>
+                </div></div>
+        </div>
+
+        <!-- 2. HH买入形态图解（总分结构） -->
+        <div class="card">
+            <!-- 主标题部分 -->
+            <div class="hh-main-title">
+                <h2>🎨 HH买点：原则上的买入法</h2>
+                <div class="hh-main-description">
+                    <div class="rule-item"><strong>核心定义：</strong>建仓形态出现 → 突破昨日高点 → 盘中买入</div>
+                    <div class="rule-item"><strong>重要说明：</strong>阳阴阳和双底都是<strong>HH的特殊形态</strong>，不是独立的买入法！</div>
+                    <div class="rule-item"><strong>使用场景：</strong>所有市场环境（趋势市+震荡市）</div>
+                    <div class="rule-item"><strong>爆发性：</strong>中等（确定性高）</div>
+                </div>
+                <div class="hh-warning-box">
+                    <strong>⚠️ 减分项：</strong>尾盘出HH属于<strong>弱势信号</strong>，是减分项，不是最佳买点！
+                </div>
+            </div>
+
+            <div class="rules-grid">
+                <!-- 子模块1：阳阴阳 -->
+                <div class="hh-subsection">
+                    <h3>⭐⭐⭐⭐ 子模块1：阳阴阳（主升浪专用）</h3>
+                    <div class="rule-item"><strong>定位：</strong>HH的特殊形态，不是独立买法</div>
+                    <div class="rule-item"><strong>定义：</strong>大阳涨停 → 阴线调整 → 再大阳（尾盘确认）</div>
+                    <div class="rule-item"><strong>⚠️ 使用场景：</strong>板块主升浪阶段（必须！）</div>
+                    <div class="rule-item"><strong>💥 爆发性：</strong>极强（主升浪利器）</div>
+                    <div class="rule-item"><strong>📋 标准7条检查：</strong></div>
+                    <div class="rule-item">□ 第一根大阳涨停 ✓</div>
+                    <div class="rule-item">□ 阴是阳线且实体小 ✓</div>
+                    <div class="rule-item">□ 无长上下影线 ✓</div>
+                    <div class="rule-item">□ 阴破前高 ✓</div>
+                    <div class="rule-item">□ 阴量大 ✓</div>
+                    <div class="rule-item">□ 板块持续上涨（强制）✓</div>
+                    <div class="rule-item">□ 成交额>8亿 ✓</div>
+                    <div class="rule-item"><strong>⚠️ 减分项：</strong>尾盘确认买入（14:30后）</div>
+                    <div class="highlight">
+                        <strong>止损止盈：</strong><br>
+                        • 止损：第一根大阳底部<br>
+                        • 止盈：次日大阳即结束
+                    </div>
+                </div>
+
+                <!-- 子模块2：双底 -->
+                <div class="hh-subsection">
+                    <h3>⭐⭐⭐ 子模块2：双底/复杂回调（震荡市）</h3>
+                    <div class="rule-item"><strong>定位：</strong>HH的特殊形态，不是独立买法</div>
+                    <div class="rule-item"><strong>定义：</strong>水平支撑位 → 止跌信号 → 尾盘买入</div>
+                    <div class="rule-item"><strong>⚠️ 使用场景：</strong>震荡市、复杂回调期</div>
+                    <div class="rule-item"><strong>💥 爆发性：</strong>弱于阳阴阳（高胜率低盈亏比）</div>
+                    <div class="rule-item"><strong>📋 识别4种形态：</strong></div>
+                    <div class="rule-item">□ 缩量小K线</div>
+                    <div class="rule-item">□ 单K线反包</div>
+                    <div class="rule-item">□ U型反转（启明星）</div>
+                    <div class="rule-item">□ 复合头肩底</div>
+                    <div class="rule-item"><strong>📋 买入前检查：</strong></div>
+                    <div class="rule-item">□ 已形成明确水平支撑</div>
+                    <div class="rule-item">□ 出现止跌K线信号</div>
+                    <div class="rule-item">□ 当前是震荡市环境</div>
+                    <div class="rule-item"><strong>⚠️ 减分项：</strong>尾盘买入（增加胜率）</div>
+                    <div class="highlight">
+                        <strong>特点：</strong><br>
+                        ✓ 属于复杂回调形态<br>
+                        ✓ 爆发性不如阳阴阳<br>
+                        ✓ 高胜率低盈亏比<br>
+                        ✓ 止损：支撑位下方
+                    </div>
+                </div>
+
+                <!-- 子模块3：标准HH检查清单 -->
+                <div class="rule-box">
+                    <h3>⭐⭐⭐⭐⭐ 标准HH买入检查清单</h3>
+                    <div class="rule-item"><strong>📋 买入前必查6项：</strong></div>
+                    <div class="rule-item">□ 已设置HH价格预警（昨高+0.01）</div>
+                    <div class="rule-item">□ 预警已触发</div>
+                    <div class="rule-item">□ 板块当日上涨 ✓</div>
+                    <div class="rule-item">□ 个股放量强势 ✓</div>
+                    <div class="rule-item">□ 账户未超风控（仓位<75%）</div>
+                    <div class="rule-item">□ 单笔风险≤1% ✓</div>
+                    <div class="highlight">
+                        <strong>优点：</strong><br>
+                        ✓ 买点明确<br>
+                        ✓ 盘中买入，当日盈利<br>
+                        ✓ 频率高，机会多<br>
+                        ✓ 适合所有市场
+                    </div>
+                    <div style="background: rgba(248, 81, 73, 0.1); border: 1px solid var(--accent-red); padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 0.9em;">
+                        <strong style="color: var(--accent-red);">⚠️ 重要：反包K线力度</strong><br>
+                        • HH信号K线如果是<strong>小实体</strong> → 反包力度不够<br>
+                        • 需结合大盘和板块<strong>谨慎考虑</strong><br>
+                        • 反包K线 = <strong>双K线反转</strong><br>
+                        • 实体越大，确定性越高
+                    </div>
+                </div>
+
+                <!-- 子模块4：形态选择策略 -->
+                <div class="rule-box">
+                    <h3>📝 形态选择策略总结</h3>
+                    <div class="rule-item"><strong>趋势市（主升浪）：</strong></div>
+                    <div class="rule-item">• 标准HH（主力）- 中等爆发性</div>
+                    <div class="rule-item">• 阳阴阳（超强）⚡ - 极强爆发性</div>
+                    <div class="rule-item">• 双底（少用）- 爆发性弱</div>
+                    <div class="rule-item"><strong>震荡市（复杂回调）：</strong></div>
+                    <div class="rule-item">• 标准HH（主力）- 中等爆发性</div>
+                    <div class="rule-item">• 双底/止跌K线（适合）- 高胜率低盈亏比</div>
+                    <div class="rule-item">• 阳阴阳（禁用）⚠️</div>
+                    <div class="highlight">
+                        <strong>爆发性排名：</strong><br>
+                        🥇 阳阴阳（主升浪）> 🥈 标准HH > 🥉 双底/止跌K线<br><br>
+                        <strong>老冯原话：</strong><br>
+                        "我现在基本就三种建仓形态：双底（包括微型双底），标准阳阴阳，变种阳阴阳。"
+                    </div>
+                </div>
+            </div>
+
+            <!-- 应用部分 -->
+            <div class="hh-application">
+                <h3>💡 应用策略总结</h3>
+                <div class="rules-grid" style="grid-template-columns: repeat(2, 1fr);">
+                    <div>
+                        <div class="rule-item"><strong>1. 识别市场环境：</strong></div>
+                        <div class="rule-item">• 主升浪 → 优先阳阴阳</div>
+                        <div class="rule-item">• 震荡市 → 优先双底</div>
+                        <div class="rule-item">• 不确定 → 标准HH</div>
+                    </div>
+                    <div>
+                        <div class="rule-item"><strong>2. 避免减分项：</strong></div>
+                        <div class="rule-item">• 尽量盘中买入HH</div>
+                        <div class="rule-item">• 尾盘HH需降低仓位</div>
+                        <div class="rule-item">• 检查反包K线力度</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 卖出策略详解 -->
+        <div class="card">
+            <h2>📤 卖出策略详解</h2>
+            
+            <div class="rules-grid">
+                <div class="rule-box">
+                    <h3>🎯 卖出五大优先级</h3>
+                    <div class="rule-item"><strong>1. 账户曲线管理 ⭐⭐⭐⭐⭐</strong></div>
+                    <div class="rule-item">当日大涨>3-5%：分批止盈</div>
+                    <div class="rule-item">利润回撤10%：立即卖出</div>
+                    <div class="rule-item">确保当天收红</div>
+                    <div class="rule-item"><strong>2. 高位股优先卖出</strong></div>
+                    <div class="rule-item">远离支撑位</div>
+                    <div class="rule-item"><strong>3. 板砸强势卖出</strong></div>
+                    <div class="rule-item">板块批量跌停</div>
+                    <div class="rule-item"><strong>4. 大盘共振参考</strong></div>
+                    <div class="rule-item">三连阴准备反弹</div>
+                    <div class="rule-item"><strong>5. 分时顶部形态</strong></div>
+                    <div class="rule-item">冲高回落/二次回踩</div>
+                </div>
+
+                <div class="rule-box">
+                    <h3>📊 神奇数字止盈法</h3>
+                    <div class="rule-item"><strong>四个神奇数字：</strong></div>
+                    <div class="rule-item">7% - 首个止盈点</div>
+                    <div class="rule-item">10% - 标准止盈点</div>
+                    <div class="rule-item">15% - 乐观止盈点</div>
+                    <div class="rule-item">20% - 最高止盈点</div>
+                    <div class="highlight">
+                        <strong>操作要点：</strong><br>
+                        ✓ 隔日止盈<br>
+                        ✓ 板砸是最好的强势卖出<br>
+                        ✓ 达到即走，不贪
+                    </div>
+                </div>
+
+                <div class="rule-box">
+                    <h3>📉 动态止损法</h3>
+                    <div class="rule-item"><strong>硬止损：-5%/-8%</strong></div>
+                    <div class="rule-item">大阳线底部设止损</div>
+                    <div class="rule-item"><strong>8%硬止损处理：</strong></div>
+                    <div class="rule-item">跌到-6%：卖一半</div>
+                    <div class="rule-item">另一半-10%卖出</div>
+                    <div class="rule-item">(防止被洗盘)</div>
+                    <div class="highlight">
+                        <strong>关键：</strong><br>
+                        ✓ 止损必须执行<br>
+                        ✓ 保护本金第一<br>
+                        ✓ 单笔最大亏1%
+                    </div>
+                </div>
+
+                <div class="rule-box">
+                    <h3>⏰ 当日分时止盈</h3>
+                    <div class="rule-item"><strong>分时图标记：</strong></div>
+                    <div class="rule-item">昨日开盘价</div>
+                    <div class="rule-item">昨日最高价</div>
+                    <div class="rule-item"><strong>操作标准：</strong></div>
+                    <div class="rule-item">早盘放量拉升突破开盘价</div>
+                    <div class="rule-item">未突破昨高也未到7%</div>
+                    <div class="rule-item">在5%涨幅附近止盈</div>
+                    <div class="highlight">
+                        <strong>警惕信号：</strong><br>
+                        ✗ 冲高回落<br>
+                        ✗ 二次回踩分时线<br>
+                        ✗ 无量拉尾盘（次日必跌）
+                    </div>
+                </div>
+
+                <div class="rule-box">
+                    <h3>🔥 特殊卖出场景</h3>
+                    <div class="rule-item"><strong>1. 指数涨+账户跌</strong></div>
+                    <div class="rule-item">逆势亏钱：换股纠错</div>
+                    <div class="rule-item">切入板块最强龙头</div>
+                    <div class="rule-item"><strong>2. 指数涨+账户平</strong></div>
+                    <div class="rule-item">持股不动（延迟满足）</div>
+                    <div class="rule-item"><strong>3. 板块共振启动日</strong></div>
+                    <div class="rule-item">有利润垫：重仓出击</div>
+                    <div class="rule-item"><strong>4. 快速拉升远离支撑</strong></div>
+                    <div class="rule-item">5%涨幅即考虑止盈</div>
+                </div>
+
+                <div class="rule-box">
+                    <h3>💡 止损/止盈比例</h3>
+                    <div class="rule-item"><strong>止损标准：</strong></div>
+                    <div class="rule-item">-5%：硬止损</div>
+                    <div class="rule-item">-8%：最大止损</div>
+                    <div class="rule-item">动态调整到盈亏平衡</div>
+                    <div class="rule-item"><strong>止盈目标：</strong></div>
+                    <div class="rule-item">≥2R（2倍风险）</div>
+                    <div class="rule-item">小赚1-2%+高胜率</div>
+                    <div class="highlight">
+                        <strong>核心法则：</strong><br>
+                        上涨时大仓位在高波动<br>
+                        下跌时大仓位在低波动
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 账户概览 -->
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">📊 账户概览</h2>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label style="color: var(--text-secondary); font-size: 0.85em;">起始本金：</label>
+                    <input type="number" id="initialCapitalInput" value="40000" step="1000" 
+                           style="width: 120px; padding: 6px 10px; margin: 0;">
+                    <button class="btn btn-small" onclick="saveInitialCapital()">💾 更新本金</button>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+<div class="stat-item">
+                    <div class="stat-label">当前市值</div>
+                    <div class="stat-value" id="currentValue">¥40,000</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">总盈亏</div>
+                    <div class="stat-value" id="totalPnL">¥0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">收益率</div>
+                    <div class="stat-value" id="totalReturn">0.00%</div>
+                </div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-label">🎯 目标进度：4万 → 20万</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 0%">0%</div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 5. 每日收益曲线 & 6. 冯总月度目标 (并排布局) -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <!-- 5. 每日收益曲线 -->
+        <div class="chart-container">
+            <h2>📈 每日收益曲线</h2>
+            <div class="chart-wrapper">
+                <canvas id="profitChart"></canvas>
+            </div>
+            <p class="subtitle">💡 点击折线点可查看/编辑当日盈亏原因</p>
+        </div>
+                    <!-- 6. 冯总月度目标 -->
+        <div class="card" style="max-width: 100%; margin: 0; padding: 20px;">
+            <h2 style="font-size: 1.2em; margin-bottom: 15px;">🎯 冯总月度目标</h2>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; background: var(--bg-secondary);">
+                    <thead>
+                        <tr style="background: var(--accent-blue);">
+                            <th style="padding: 12px; color: #c9d1d9; text-align: center;; font-size: 0.8em;">月份</th>
+                            <th style="padding: 12px; color: #c9d1d9; text-align: center;">计划月收益</th>
+                            <th style="padding: 12px; color: #c9d1d9; text-align: center;">累计收益</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border);">1月</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-green);">+20%</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-cyan);">120%</td></tr>
+                        <tr><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border);">2月</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-green);">+15%</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-cyan);">138%</td></tr>
+                        <tr><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border);">3月</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-green);">+20%</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-cyan);">166%</td></tr>
+                        <tr><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border);">4月</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-green);">+20%</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-cyan);">199%</td></tr>
+                        <tr><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border);">5月</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-green);">+15%</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-cyan);">229%</td></tr>
+                        <tr><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border);">6月</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-green);">+25%</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-cyan);">286%</td></tr>
+                        <tr><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border);">7月</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-green);">+25%</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-cyan);">357%</td></tr>
+                        <tr><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border);">8月</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-green);">+25%</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-cyan);">446%</td></tr>
+                        <tr><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border);">9月</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-green);">+20%</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-cyan);">536%</td></tr>
+                        <tr><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border);">10月</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-green);">+15%</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-cyan);">616%</td></tr>
+                        <tr><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border);">11月</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-green);">+20%</td><td style="padding: 10px; text-align: center; border-bottom: 1px solid var(--table-border); color: var(--accent-cyan);">739%</td></tr>
+                        <tr><td style="padding: 10px; text-align: center;">12月</td><td style="padding: 10px; text-align: center; color: var(--accent-green);">+20%</td><td style="padding: 10px; text-align: center; color: var(--accent-cyan); font-weight: 600;">887%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+<p class="subtitle">💡 冯总年度目标：887% | 平均月收益：20.6%</p>
+        </div>
+
+        <!-- 7. 交易记录 -->
+        <div class="card">
+            <h2>📝 交易记录</h2>
+            
+            <div class="trade-form">
+                <div>
+                    <label>股票名称</label>
+                    <input type="text" id="stockName" placeholder="ABC科技">
+                </div>
+                <div>
+                    <label>买入价格</label>
+                    <input type="number" id="buyPrice" placeholder="10.50" step="0.01" oninput="calculatePlan()">
+                </div>
+                <div>
+                    <label>止损价格</label>
+                    <input type="number" id="stopLoss" placeholder="9.66" step="0.01" oninput="calculatePlan()">
+                </div>
+                <div>
+                    <label>止盈价格</label>
+                    <input type="number" id="targetPrice" placeholder="12.60" step="0.01" oninput="calculatePlan()">
+                </div>
+                <div>
+                    <label>投入金额</label>
+                    <input type="number" id="investAmount" placeholder="5000" step="100" oninput="calculatePlan()">
+                </div>
+            </div>
+
+            <!-- 盈亏比计算结果 -->
+            <div class="trade-calculation-result" id="tradeResult" style="display: none;">
+                <div class="calculation-grid">
+                    <div class="calc-item">
+                        <div class="calc-label">预计股数</div>
+                        <div class="calc-value" id="calcShares">-</div>
+                    </div>
+                    <div class="calc-item">
+                        <div class="calc-label">每股风险</div>
+                        <div class="calc-value" id="calcRisk">-</div>
+                    </div>
+                    <div class="calc-item">
+                        <div class="calc-label">止损金额</div>
+                        <div class="calc-value negative" id="calcLoss">-</div>
+                    </div>
+                    <div class="calc-item">
+                        <div class="calc-label">止盈金额</div>
+                        <div class="calc-value positive" id="calcProfit">-</div>
+                    </div>
+                    <div class="calc-item">
+                        <div class="calc-label">盈亏比</div>
+                        <div class="calc-value" id="calcR">-</div>
+                    </div>
+                    <div class="calc-item">
+                        <div class="calc-label">账户风险</div>
+                        <div class="calc-value" id="calcRiskPct">-</div>
+                    </div>
+                </div>
+                <div class="calculation-warning" id="calcWarning"></div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <button class="btn" onclick="submitTrade()">✅ 提交交易计划</button>
+            </div>
+
+        <div class="table-container">
+                <table id="tradeTable">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>代码</th>
+                            <th>名称</th>
+                            <th>买入价</th>
+                            <th>股数</th>
+                            <th>成本</th>
+                            <th>当前价</th>
+                            <th>市值</th>
+                            <th>盈亏</th>
+                            <th>盈亏%</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tradeList"></tbody>
+                </table>
+            </div>
+
+            <div class="storage-info">💾 所有数据自动保存到浏览器本地存储</div>
+        </div>
+
+        <!-- 8. 每日检查清单 -->
+        <div class="card">
+            <h2>✅ 每日交易检查清单</h2>
+            
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="check1" onchange="toggleCheck(this)">
+                    <label for="check1">检查账户状态（市值、仓位、盈亏）</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check2" onchange="toggleCheck(this)">
+                    <label for="check2">设置HH价格预警（3-5只）</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check3" onchange="toggleCheck(this)">
+                    <label for="check3">自选股观察3天以上</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check4" onchange="toggleCheck(this)">
+                    <label for="check4">成交额>10亿 ✓</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check5" onchange="toggleCheck(this)">
+                    <label for="check5">板块当日上涨 ✓</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check6" onchange="toggleCheck(this)">
+                    <label for="check6">个股放量强势 ✓</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check7" onchange="toggleCheck(this)">
+                    <label for="check7">单笔风险≤1% ✓</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check8" onchange="toggleCheck(this)">
+                    <label for="check8">已设置止损-8% ✓</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check9" onchange="toggleCheck(this)">
+                    <label for="check9">已设置止盈+1%/+2%/+3%</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check10" onchange="toggleCheck(this)">
+                    <label for="check10">今日未超风控 ✓</label>
+                </div>
+            </div>
+
+            <button class="btn" onclick="resetChecklist()" style="margin-top: 15px;">🔄 重置清单（新的一天）</button>
+        </div>
+
+        <!-- 9. 系统提示 -->
+        <div class="card">
+            <h2>💡 系统提示</h2>
+            <div id="systemAlert"></div>
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal" id="noteModal">
+        <div class="modal-content">
+            <h3 id="modalTitle">📝 当日盈亏原因</h3>
+            <textarea id="noteTextarea" placeholder="记录今日盈亏的原因，例如：&#10;- 某只股票大涨，账户整体收益+2%&#10;- 大盘调整，账户回撤-1%&#10;- 新开仓股票被止损，亏损-0.5%&#10;- 持有股票集体上涨，+3%"></textarea>
+            <div class="modal-buttons">
+                <button class="btn" onclick="saveNote()">💾 保存</button>
+                <button class="btn btn-danger" onclick="closeModal()">✕ 关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 数据存储
+        let trades = JSON.parse(localStorage.getItem('trades')) || [];
+        let dailyData = JSON.parse(localStorage.getItem('dailyData')) || [];
+        let initialCapital = parseFloat(localStorage.getItem('initialCapital')) || 40000;
+        let weekStartCapital = parseFloat(localStorage.getItem('weekStartCapital')) || initialCapital;
+        let profitChart = null;
+
+        // 初始化
+
+        // 计算交易计划
+        function calculatePlan() {
+            const buyPrice = parseFloat(document.getElementById('buyPrice').value) || 0;
+            const stopLoss = parseFloat(document.getElementById('stopLoss').value) || 0;
+            const targetPrice = parseFloat(document.getElementById('targetPrice').value) || 0;
+            const amount = parseFloat(document.getElementById('investAmount').value) || 0;
+            
+            const resultDiv = document.getElementById('tradeResult');
+            const warningDiv = document.getElementById('calcWarning');
+            
+            if (buyPrice <= 0 || stopLoss <= 0 || targetPrice <= 0 || amount <= 0) {
+                resultDiv.style.display = 'none';
+                return;
+            }
+            
+            resultDiv.style.display = 'block';
+            
+            const shares = Math.floor(amount / buyPrice);
+            const riskPerShare = buyPrice - stopLoss;
+            const lossAmount = riskPerShare * shares;
+            const profitAmount = (targetPrice - buyPrice) * shares;
+            const rRatio = lossAmount > 0 ? (profitAmount / lossAmount).toFixed(2) : 0;
+            const currentCapital = getCurrentCapital();
+            const accountRisk = ((lossAmount / currentCapital) * 100).toFixed(2);
+            
+            document.getElementById('calcShares').textContent = shares;
+            document.getElementById('calcRisk').textContent = '¥' + riskPerShare.toFixed(2);
+            document.getElementById('calcLoss').textContent = '-¥' + lossAmount.toFixed(2);
+            document.getElementById('calcProfit').textContent = '+¥' + profitAmount.toFixed(2);
+            document.getElementById('calcR').textContent = rRatio + 'R';
+            document.getElementById('calcRiskPct').textContent = accountRisk + '%';
+            
+            warningDiv.className = 'calculation-warning';
+            
+            if (parseFloat(accountRisk) > 1.5) {
+                warningDiv.classList.add('danger');
+                warningDiv.innerHTML = '<strong>⚠️ 风险过大：' + accountRisk + '% 超过1.5%！</strong>';
+            } else if (parseFloat(rRatio) < 2) {
+                warningDiv.classList.add('warning');
+                warningDiv.innerHTML = '<strong>⚠️ 盈亏比：' + rRatio + 'R，未达2R目标</strong>';
+            } else {
+                warningDiv.classList.add('success');
+                warningDiv.innerHTML = '<strong>✅ 优秀：' + rRatio + 'R，可以开仓！</strong>';
+            }
+        }
+
+        // 提交交易
+        function submitTrade() {
+            const name = document.getElementById('stockName').value;
+            const buyPrice = parseFloat(document.getElementById('buyPrice').value);
+            const stopLoss = parseFloat(document.getElementById('stopLoss').value);
+            const targetPrice = parseFloat(document.getElementById('targetPrice').value);
+            const amount = parseFloat(document.getElementById('investAmount').value);
+            
+            if (!name || !buyPrice || !stopLoss || !targetPrice || !amount) {
+                alert('⚠️ 请填写完整信息！');
+                return;
+            }
+            
+            const shares = Math.floor(amount / buyPrice);
+            const trade = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString('zh-CN'),
+                code: name.substring(0, 6),
+                name: name,
+                buyPrice: buyPrice,
+                shares: shares,
+                cost: amount,
+                currentPrice: buyPrice,
+                stopLoss: stopLoss,
+                targetPrice: targetPrice,
+                status: 'holding'
+            };
+            
+            trades.push(trade);
+            saveTrades();
+            updateDisplay();
+            updateChart();
+            
+            document.getElementById('stockName').value = '';
+            document.getElementById('buyPrice').value = '';
+            document.getElementById('stopLoss').value = '';
+            document.getElementById('targetPrice').value = '';
+            document.getElementById('investAmount').value = '';
+            document.getElementById('tradeResult').style.display = 'none';
+            
+            alert('✅ 已提交！收益曲线已更新');
+        }
+
+        function init() {
+            document.getElementById('initialCapitalInput').value = initialCapital;
+            updateDisplay();
+            updateChart();
+            updateWeekStats();
+            loadChecklist();
+            showSystemTips();
+            
+            // 自动计算股数
+            document.getElementById('buyAmount').addEventListener('input', calculateShares);
+            document.getElementById('buyPrice').addEventListener('input', calculateShares);
+            
+            // 初始化图表
+            initChart();
+        }
+
+        // 保存起始本金
+        function saveInitialCapital() {
+            const newCapital = parseFloat(document.getElementById('initialCapitalInput').value);
+            
+            if (isNaN(newCapital) || newCapital <= 0) {
+                alert('⚠️ 请输入有效的本金金额！');
+                return;
+            }
+
+            if (newCapital === initialCapital) {
+                alert('⚠️ 新本金与当前相同，无需更新！');
+                return;
+            }
+
+            if (confirm(`确定要更新起始本金吗？\n当前：¥${initialCapital.toLocaleString()}\n新值：¥${newCapital.toLocaleString()}\n\n⚠️ 注意：更新后将重新计算周起始资金。`)) {
+                initialCapital = newCapital;
+                localStorage.setItem('initialCapital', newCapital);
+                
+                // 重置周起始资金
+                weekStartCapital = initialCapital;
+                localStorage.setItem('weekStartCapital', weekStartCapital);
+                
+                // 更新所有显示
+                updateDisplay();
+                updateChart();
+                updateWeekStats();
+                
+                alert('✅ 起始本金已更新！\n\n所有统计数据已重新计算。');
+            }
+        }
+
+        // 计算股数
+        function calculateShares() {
+            const amount = parseFloat(document.getElementById('buyAmount').value) || 0;
+            const price = parseFloat(document.getElementById('buyPrice').value) || 0;
+            
+            if (price > 0) {
+                const shares = Math.floor(amount / price);
+                document.getElementById('shares').value = shares;
+                
+                // 计算止损价
+                const stopLoss = price * 0.92;
+                document.getElementById('stopLoss').value = stopLoss.toFixed(2);
+                
+                // 计算2R止盈价格
+                const profit2R = price * 2;
+            }
+        }
+
+        // 添加交易
+        function addTrade() {
+            const code = document.getElementById('stockCode').value;
+            const name = document.getElementById('stockName').value;
+            const buyPrice = parseFloat(document.getElementById('buyPrice').value);
+            const amount = parseFloat(document.getElementById('buyAmount').value);
+            const shares = parseInt(document.getElementById('shares').value);
+            const stopLoss = parseFloat(document.getElementById('stopLoss').value);
+
+            if (!code || !name || !buyPrice || !amount || !shares) {
+                alert('⚠️ 请填写完整信息！');
+                return;
+            }
+
+            // 检查单笔风险
+            const risk = amount * 0.08;
+            const riskPercent = (risk / getCurrentCapital()) * 100;
+            
+            if (riskPercent > 1.5) {
+                if (!confirm(`⚠️ 单笔风险 ${riskPercent.toFixed(2)}% 超过1.5%建议值\n确定要买入吗？`)) {
+                    return;
+                }
+            }
+
+            const trade = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString('zh-CN'),
+                code: code,
+                name: name,
+                buyPrice: buyPrice,
+                shares: shares,
+                cost: amount,
+                currentPrice: buyPrice,
+                stopLoss: stopLoss,
+                status: 'holding'
+            };
+
+            trades.push(trade);
+            saveTrades();
+            updateDisplay();
+            updateChart();
+            updateWeekStats();
+            clearForm();
+        }
+
+        // 卖出
+        function sellTrade(id) {
+            const trade = trades.find(t => t.id === id);
+            if (!trade) return;
+
+            const sellPrice = prompt(`当前成本：${trade.buyPrice}元\n请输入卖出价格：`, trade.currentPrice);
+            if (sellPrice === null) return;
+
+            const price = parseFloat(sellPrice);
+            if (isNaN(price)) {
+                alert('请输入有效的价格！');
+                return;
+            }
+
+            // 计算盈亏比R
+            const pnl = (price - trade.buyPrice) * trade.shares;
+            const pnlPercent = ((price - trade.buyPrice) / trade.buyPrice * 100).toFixed(2);
+            const riskAmount = trade.cost * 0.08;
+            const r_multiple = (pnl / riskAmount).toFixed(2);
+
+            if (parseFloat(r_multiple) < 2) {
+                if (!confirm(`⚠️ 当前盈亏比仅 ${r_multiple}R，未达到2R目标！\n确定要卖出吗？`)) {
+                    return;
+                }
+            }
+
+            if (confirm(`确定卖出吗？\n盈亏：¥${pnl.toFixed(2)} (${pnlPercent}%)\n盈亏比：${r_multiple}R`)) {
+                trade.sellPrice = price;
+                trade.sellDate = new Date().toLocaleDateString('zh-CN');
+                trade.pnl = pnl;
+                trade.pnlPercent = pnlPercent;
+                trade.status = 'sold';
+                
+                saveTrades();
+                updateDisplay();
+                updateChart();
+                updateWeekStats();
+            }
+        }
+
+        // 删除交易
+        function deleteTrade(id) {
+            if (confirm('确定要删除这条记录吗？')) {
+                trades = trades.filter(t => t.id !== id);
+                saveTrades();
+                updateDisplay();
+                updateChart();
+                updateWeekStats();
+            }
+        }
+
+        // 快速更新价格
+        function quickUpdatePrice(id, price) {
+            const trade = trades.find(t => t.id === id);
+            if (trade) {
+                trade.currentPrice = parseFloat(price);
+                saveTrades();
+                updateDisplay();
+                updateChart();
+                updateWeekStats();
+            }
+        }
+
+        // 获取当前市值
+        function getCurrentCapital() {
+            let total = initialCapital;
+            
+            trades.forEach(trade => {
+                if (trade.status === 'holding') {
+                    total += (trade.currentPrice - trade.buyPrice) * trade.shares;
+                } else if (trade.status === 'sold') {
+                    total += trade.pnl;
+                }
+            });
+            
+            return total;
+        }
+
+        // 更新显示
+        function updateDisplay() {
+            const currentCapital = getCurrentCapital();
+            const totalPnL = currentCapital - initialCapital;
+            const totalReturn = ((totalPnL / initialCapital) * 100).toFixed(2);
+            const progress = Math.min(((currentCapital - 40000) / (200000 - 40000)) * 100, 100);
+
+            document.getElementById('initialCapital').textContent = `¥${initialCapital.toLocaleString()}`;
+            document.getElementById('currentValue').textContent = `¥${currentCapital.toLocaleString()}`;
+            
+            const pnlElement = document.getElementById('totalPnL');
+            pnlElement.textContent = `${totalPnL >= 0 ? '+' : ''}¥${totalPnL.toLocaleString()}`;
+            pnlElement.className = 'stat-value ' + (totalPnL >= 0 ? 'positive' : 'negative');
+            
+            const returnElement = document.getElementById('totalReturn');
+            returnElement.textContent = `${totalReturn}%`;
+            returnElement.className = 'stat-value ' + (totalReturn >= 0 ? 'positive' : 'negative');
+            
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('progressBar').textContent = `${progress.toFixed(1)}%`;
+
+            // 更新交易列表
+            const tradeList = document.getElementById('tradeList');
+            tradeList.innerHTML = '';
+
+            trades.forEach(trade => {
+                const marketValue = trade.status === 'holding' 
+                    ? trade.currentPrice * trade.shares 
+                    : trade.sellPrice * trade.shares;
+                const pnl = trade.status === 'sold' 
+                    ? trade.pnl 
+                    : (trade.currentPrice - trade.buyPrice) * trade.shares;
+                const pnlPercent = trade.status === 'sold' 
+                    ? trade.pnlPercent 
+                    : ((trade.currentPrice - trade.buyPrice) / trade.buyPrice * 100).toFixed(2);
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${trade.date}</td>
+                    <td>${trade.code}</td>
+                    <td>${trade.name}</td>
+                    <td>¥${trade.buyPrice.toFixed(2)}</td>
+                    <td>${trade.shares}</td>
+                    <td>¥${trade.cost.toLocaleString()}</td>
+                    <td>
+                        ${trade.status === 'holding' 
+                            ? `<input type="number" value="${trade.currentPrice}" 
+                                style="width: 80px; padding: 6px 8px;"
+                                onchange="quickUpdatePrice(${trade.id}, this.value)">` 
+                            : `¥${trade.sellPrice.toFixed(2)}`}
+                    </td>
+                    <td>¥${marketValue.toLocaleString()}</td>
+                    <td class="${pnl >= 0 ? 'positive' : 'negative'}">
+                        ${pnl >= 0 ? '+' : ''}¥${pnl.toFixed(2)}
+                    </td>
+                    <td class="${pnlPercent >= 0 ? 'positive' : 'negative'}">
+                        ${pnlPercent >= 0 ? '+' : ''}${pnlPercent}%
+                    </td>
+                    <td>
+                        ${trade.status === 'holding' 
+                            ? `<button class="btn btn-small" onclick="sellTrade(${trade.id})">卖出</button>
+                                <button class="btn btn-danger" onclick="deleteTrade(${trade.id})" style="margin-left: 5px;">删除</button>`
+                            : `<span style="color: var(--accent-green);">已卖出</span>`}
+                    </td>
+                `;
+                tradeList.appendChild(row);
+            });
+        }
+
+        // 初始化图表
+        function initChart() {
+            const ctx = document.getElementById('profitChart').getContext('2d');
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(63, 185, 80, 0.3)');
+            gradient.addColorStop(1, 'rgba(57, 197, 207, 0.1)');
+
+            profitChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '累计收益率',
+                        data: [],
+                        borderColor: '#3fb950',
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#3fb950',
+                        pointBorderColor: '#21262d',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointHoverBackgroundColor: '#58a6ff',
+                        pointHoverBorderColor: '#21262d',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(22, 27, 34, 0.95)',
+                            titleColor: '#c9d1d9',
+                            bodyColor: '#c9d1d9',
+                            borderColor: '#30363d',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `收益率: ${context.parsed.y}%`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: '#21262d',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#8b949e',
+                                font: {
+                                    family: 'JetBrains Mono'
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: '#21262d',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#8b949e',
+                                callback: function(value) {
+                                    return value + '%';
+                                },
+                                font: {
+                                    family: 'JetBrains Mono'
+                                }
+                            }
+                        }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const dataPoint = dailyData[index];
+                            openModal(dataPoint.date, dataPoint.note || '', index);
+                        }
+                    },
+                    onHover: (event, elements) => {
+                        event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                    }
+                }
+            });
+        }
+
+        // 更新图表
+        function updateChart() {
+            // 合并交易和每日记录
+            const combinedData = [...dailyData];
+            
+            // 如果有新交易，自动创建当日记录
+            const today = new Date().toLocaleDateString('zh-CN');
+            if (!dailyData.find(d => d.date === today)) {
+                const returnPercent = ((getCurrentCapital() - initialCapital) / initialCapital) * 100;
+                dailyData.push({
+                    date: today,
+                    dailyReturn: returnPercent.toFixed(2),
+                    note: ''
+                });
+                localStorage.setItem('dailyData', JSON.stringify(dailyData));
+            } else {
+                // 更新今日收益率
+                const todayIndex = dailyData.findIndex(d => d.date === today);
+                if (todayIndex >= 0) {
+                    dailyData[todayIndex].dailyReturn = ((getCurrentCapital() - initialCapital) / initialCapital * 100).toFixed(2);
+                    localStorage.setItem('dailyData', JSON.stringify(dailyData));
+                }
+            }
+            
+            // 按日期排序
+            combinedData.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // 计算累计收益
+            let runningReturn = 0;
+            const labels = [];
+            const data = [];
+            
+            combinedData.forEach(item => {
+                labels.push(item.date);
+                runningReturn = item.dailyReturn;
+                data.push(runningReturn);
+            });
+            
+            profitChart.data.labels = labels;
+            profitChart.data.datasets[0].data = data;
+            profitChart.update();
+        }
+
+        // 打开模态框
+        function openModal(date, note, index) {
+            const modal = document.getElementById('noteModal');
+            const textarea = document.getElementById('noteTextarea');
+            const title = document.getElementById('modalTitle');
+            
+            title.textContent = `📝 ${date} - 收益率：${dailyData[index].dailyReturn}%`;
+            textarea.value = note || '';
+            modal.classList.add('active');
+            
+            modal.dataset.date = date;
+            modal.dataset.index = index;
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            const modal = document.getElementById('noteModal');
+            modal.classList.remove('active');
+        }
+
+        // 保存备注
+        function saveNote() {
+            const modal = document.getElementById('noteModal');
+            const note = document.getElementById('noteTextarea').value;
+            const date = modal.dataset.date;
+            const index = parseInt(modal.dataset.index);
+            
+            if (index >= 0 && index < dailyData.length) {
+                dailyData[index].note = note;
+                localStorage.setItem('dailyData', JSON.stringify(dailyData));
+            }
+            
+            closeModal();
+            alert('✅ 备注已保存！');
+        }
+
+        // 更新周度统计
+        function updateWeekStats() {
+            const currentCapital = getCurrentCapital();
+            const weekPnL = currentCapital - weekStartCapital;
+            const weekReturn = ((weekPnL / weekStartCapital) * 100).toFixed(2);
+            const weekTarget = ((weekPnL / (weekStartCapital * 0.035)) * 100).toFixed(1);
+
+            if (document.getElementById('weekStart')) {
+                document.getElementById('weekStart').textContent = `¥${weekStartCapital.toLocaleString()}`;
+                
+                const weekPnLElement = document.getElementById('weekPnL');
+                weekPnLElement.textContent = `${weekPnL >= 0 ? '+' : ''}¥${weekPnL.toLocaleString()}`;
+                weekPnLElement.className = 'stat-value ' + (weekPnL >= 0 ? 'positive' : 'negative');
+                
+                const weekReturnElement = document.getElementById('weekReturn');
+                weekReturnElement.textContent = `${weekReturn}%`;
+                weekReturnElement.className = 'stat-value ' + (weekReturn >= 0 ? 'positive' : 'negative');
+                
+                document.getElementById('weekTarget').textContent = `${weekTarget}%`;
+
+                // 周度提醒
+                const weekAlert = document.getElementById('weekAlert');
+                if (weekPnL < 0) {
+                    weekAlert.innerHTML = '<div class="alert alert-danger">⚠️ 本周亏损，请控制风险！</div>';
+                } else if (parseFloat(weekReturn) < 3.5) {
+                    weekAlert.innerHTML = '<div class="alert alert-warning">📊 本周收益未达3.5%目标，继续努力！</div>';
+                } else {
+                    weekAlert.innerHTML = '<div class="alert alert-success">🎉 恭喜！本周达成3.5%收益目标！</div>';
+                }
+            }
+        }
+
+        // 清空表单
+        function clearForm() {
+            document.getElementById('stockCode').value = '';
+            document.getElementById('stockName').value = '';
+            document.getElementById('buyPrice').value = '';
+            document.getElementById('buyAmount').value = '';
+            document.getElementById('shares').value = '';
+            document.getElementById('stopLoss').value = '';
+        }
+
+        // 保存数据
+        function saveTrades() {
+            localStorage.setItem('trades', JSON.stringify(trades));
+        }
+
+        // 检查清单
+        function toggleCheck(checkbox) {
+            const item = checkbox.closest('.checklist-item');
+            if (checkbox.checked) {
+                item.classList.add('completed');
+            } else {
+                item.classList.remove('completed');
+            }
+            saveChecklist();
+        }
+
+        function saveChecklist() {
+            const checks = {};
+            for (let i = 1; i <= 10; i++) {
+                checks[`check${i}`] = document.getElementById(`check${i}`).checked;
+            }
+            localStorage.setItem('checklist', JSON.stringify(checks));
+        }
+
+        function loadChecklist() {
+            const checks = JSON.parse(localStorage.getItem('checklist')) || {};
+            for (let i = 1; i <= 10; i++) {
+                const checkbox = document.getElementById(`check${i}`);
+                if (checkbox && checks[`check${i}`]) {
+                    checkbox.checked = true;
+                    checkbox.closest('.checklist-item').classList.add('completed');
+                }
+            }
+        }
+
+        function resetChecklist() {
+            if (confirm('确定要重置清单吗？（新的一天开始）')) {
+                for (let i = 1; i <= 10; i++) {
+                    const checkbox = document.getElementById(`check${i}`);
+                    checkbox.checked = false;
+                    checkbox.closest('.checklist-item').classList.remove('completed');
+                }
+                saveChecklist();
+            }
+        }
+
+        // 显示系统提示
+        function showSystemTips() {
+            const tips = [
+                '💡 保守方案：单笔1-2%，周收益3.5%，年收益约182%',
+                '💡 高胜率优先：只做最确定的HH买点',
+                '💡 成交额>10亿：流动性好，进出方便',
+                '💡 同时持仓4-6只：分散风险，降低回撤',
+                '💡 快进快出：持股1-3天，达标就走',
+                '💡 止损-8%：单笔最大亏损1%',
+                '💡 卖出≥2R：盈亏比达到2倍再止盈'
+            ];
+            
+            const randomTip = tips[Math.floor(Math.random() * tips.length)];
+            document.getElementById('systemAlert').innerHTML = `<div class="alert alert-success">${randomTip}</div>`;
+        }
+
+        // 页面加载时初始化
+        window.onload = init;
+    </script>
+</body>
+</html>
