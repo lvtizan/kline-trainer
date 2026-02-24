@@ -1288,6 +1288,7 @@
 
         // 提交交易
         function submitTrade() {
+            console.log('submitTrade被调用');
             const name = document.getElementById('stockName').value;
             const buyPrice = parseFloat(document.getElementById('buyPrice').value);
             const stopLoss = parseFloat(document.getElementById('stopLoss').value);
@@ -1296,7 +1297,7 @@
             const amount = parseFloat(document.getElementById('investAmount').value);
             
             if (!name || !buyPrice || !stopLoss || !amount) {
-                alert('⚠️ 请填写完整信息！');
+                console.log('验证失败: 请填写完整信息'); alert('⚠️ 请填写完整信息！');
                 return;
             }
             
@@ -1321,6 +1322,7 @@
             };
             
             trades.push(trade);
+            console.log('交易已添加:', trade);
             saveTrades();
             updateDisplay();
             updateChart();
@@ -1328,7 +1330,8 @@
             document.getElementById('stockName').value = '';
             document.getElementById('buyPrice').value = '';
             document.getElementById('stopLoss').value = '';
-            document.getElementById('targetPrice').value = '';
+            document.getElementById('actualTargetPrice').value = '';
+            document.getElementById('profitLossAmount').value = '';
             document.getElementById('investAmount').value = '';
             document.getElementById('tradeResult').style.display = 'none';
             
@@ -1410,7 +1413,7 @@
             const stopLoss = parseFloat(document.getElementById('stopLoss').value);
 
             if (!code || !name || !buyPrice || !amount || !shares) {
-                alert('⚠️ 请填写完整信息！');
+                console.log('验证失败: 请填写完整信息'); alert('⚠️ 请填写完整信息！');
                 return;
             }
 
@@ -1438,6 +1441,7 @@
             };
 
             trades.push(trade);
+            console.log('交易已添加:', trade);
             saveTrades();
             updateDisplay();
             updateChart();
@@ -1530,7 +1534,6 @@
             const totalReturn = ((totalPnL / initialCapital) * 100).toFixed(2);
             const progress = Math.min(((currentCapital - 40000) / (200000 - 40000)) * 100, 100);
 
-            document.getElementById('initialCapital').textContent = `¥${initialCapital.toLocaleString()}`;
             document.getElementById('currentValue').textContent = `¥${currentCapital.toLocaleString()}`;
             
             const pnlElement = document.getElementById('totalPnL');
