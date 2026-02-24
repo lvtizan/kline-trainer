@@ -1,0 +1,29 @@
+# 备份文件
+*.backup
+*.bak
+trading-system-dark-backup-*.html
+
+# 临时文件
+*_temp.*
+tmp.*
+*.tmp
+
+# PDF文件（大文件）
+*.pdf
+
+# 提取的文本文件
+*_extracted.txt
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 编辑器文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 测试文件
+test.*
