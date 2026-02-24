@@ -1072,7 +1072,7 @@
 
         <!-- 7. 交易记录 -->
         <div class="card">
-            <h2>📝 交易记录 <button class="btn btn-small" onclick="submitTrade()" style="float: right;">✅ 提交交易计划</button></h2>
+            <h2>📝 交易记录</h2>
             
             <div class="trade-form">
                 <div>
@@ -1132,6 +1132,10 @@
                 <div class="calculation-warning" id="calcWarning"></div>
             </div>
 
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0; color: var(--accent-green);">交易列表</h3>
+            <button class="btn btn-small" onclick="submitTrade()">✅ 提交交易计划</button>
+        </div>
         <div class="table-container">
                 <table id="tradeTable">
                     <thead>
@@ -1142,6 +1146,7 @@
                             <th>买入价</th>
                             <th>股数</th>
                             <th>成本</th>
+                            <th>仓位</th>
                             <th>当前价</th>
                             <th>市值</th>
                             <th>盈亏</th>
@@ -1286,15 +1291,19 @@
             const name = document.getElementById('stockName').value;
             const buyPrice = parseFloat(document.getElementById('buyPrice').value);
             const stopLoss = parseFloat(document.getElementById('stopLoss').value);
-            const targetPrice = parseFloat(document.getElementById('targetPrice').value);
+            const actualTargetPrice = parseFloat(document.getElementById('actualTargetPrice').value) || 0;
+            const profitLossAmount = parseFloat(document.getElementById('profitLossAmount').value) || 0;
             const amount = parseFloat(document.getElementById('investAmount').value);
             
-            if (!name || !buyPrice || !stopLoss || !targetPrice || !amount) {
+            if (!name || !buyPrice || !stopLoss || !amount) {
                 alert('⚠️ 请填写完整信息！');
                 return;
             }
             
             const shares = Math.floor(amount / buyPrice);
+            const currentCapital = getCurrentCapital();
+            const positionPct = ((amount / currentCapital) * 100).toFixed(2);
+            
             const trade = {
                 id: Date.now(),
                 date: new Date().toLocaleDateString('zh-CN'),
@@ -1305,7 +1314,9 @@
                 cost: amount,
                 currentPrice: buyPrice,
                 stopLoss: stopLoss,
-                targetPrice: targetPrice,
+                actualTargetPrice: actualTargetPrice,
+                profitLossAmount: profitLossAmount,
+                positionPct: positionPct,
                 status: 'holding'
             };
             
@@ -1556,6 +1567,9 @@
                     <td>¥${trade.buyPrice.toFixed(2)}</td>
                     <td>${trade.shares}</td>
                     <td>¥${trade.cost.toLocaleString()}</td>
+                    <td style="text-align: center; color: var(--accent-cyan); font-weight: 600;">
+                        ${trade.positionPct || '0.00'}%
+                    </td>
                     <td>
                         ${trade.status === 'holding' 
                             ? `<input type="number" value="${trade.currentPrice}" 
