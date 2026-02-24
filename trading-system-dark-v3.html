@@ -1134,7 +1134,10 @@
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h3 style="margin: 0; color: var(--accent-green);">交易列表</h3>
-            <button class="btn btn-small" onclick="submitTrade()">✅ 提交交易计划</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-small" onclick="submitTrade()">✅ 提交交易计划</button>
+                <button class="btn btn-small btn-danger" onclick="clearAllTrades()">🗑️ 清空所有交易</button>
+            </div>
         </div>
         <div class="table-container">
                 <table id="tradeTable">
@@ -1336,6 +1339,28 @@
             document.getElementById('tradeResult').style.display = 'none';
             
             alert('✅ 已提交！收益曲线已更新');
+        }
+
+        // 清空所有交易
+        function clearAllTrades() {
+            if (confirm('⚠️ 确定要清空所有交易记录吗？此操作不可恢复！')) {
+                trades = [];
+                saveTrades();
+                updateDisplay();
+                updateChart();
+                alert('✅ 已清空所有交易记录');
+            }
+        }
+
+        // 清空所有交易
+        function clearAllTrades() {
+            if (confirm('⚠️ 确定要清空所有交易记录吗？此操作不可恢复！')) {
+                trades = [];
+                saveTrades();
+                updateDisplay();
+                updateChart();
+                alert('✅ 已清空所有交易记录');
+            }
         }
 
         function init() {
