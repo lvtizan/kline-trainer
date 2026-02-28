@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老冯K线训练系统 - 每日20图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 顶部进度条 */
+        .progress-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .progress-title {
+            font-size: 1.3em;
+            color: #00d2ff;
+        }
+
+        .progress-date {
+            color: #888;
+        }
+
+        .progress-bar-container {
+            height: 30px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            border-radius: 15px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .progress-milestones {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        .milestone {
+            width: 20%;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .milestone.reached {
+            background: rgba(46, 213, 115, 0.2);
+            color: #2ed573;
+        }
+
+        /* 分类统计 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateY(-2px);
+        }
+
+        .stat-card.active {
+            border-color: #00d2ff;
+            background: rgba(0, 210, 255, 0.1);
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00d2ff;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        /* 添加表单 */
+        .add-form {
+            background: rgba(255,255,255,0.05);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 0.95em;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #00d2ff;
+        }
+
+        .file-upload {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        .file-upload-btn {
+            padding: 10px 20px;
+            border: 1px dashed rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.05);
+            color: #aaa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: #00d2ff;
+            color: #fff;
+        }
+
+        .preview-img {
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: 8px;
+            display: none;
+            margin-top: 10px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 210, 255, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #444;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 案例网格 */
+        .cases-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.4em;
+            color: #fff;
+        }
+
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .case-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .case-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 210, 255, 0.2);
+            border-color: rgba(0, 210, 255, 0.3);
+        }
+
+        .case-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .case-content {
+            padding: 15px;
+        }
+
+        .case-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            margin-bottom: 8px;
+            background: rgba(0, 210, 255, 0.2);
+            color: #00d2ff;
+        }
+
+        .case-pattern {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .case-desc {
+            color: #888;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+
+        .case-date {
+            color: #555;
+            font-size: 0.75em;
+            margin-top: 10px;
+        }
+
+        .case-delete-btn {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255, 71, 87, 0.15);
+            color: #ff4757;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .case-card:hover .case-delete-btn {
+            opacity: 1;
+        }
+
+        .case-delete-btn:hover {
+            background: rgba(255, 71, 87, 0.3);
+            transform: scale(1.1);
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 10px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: #fff;
+            font-size: 2em;
+            cursor: pointer;
+        }
+
+        .modal-info {
+            text-align: center;
+            margin-top: 20px;
+            color: #e0e0e0;
+            padding: 0 20px;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #555;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        /* 成功提示 */
+        .success-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #2ed573, #26af61);
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(46, 213, 115, 0.4);
+            transform: translateX(200%);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+        }
+
+        .success-toast.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .cases-grid {
+                grid-template-columns: 1fr;
+            }
+            .progress-milestones {
+                flex-wrap: wrap;
+            }
+            .milestone {
+                width: 48%;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 每日进度 -->
+        <div class="progress-section">
+            <div class="progress-header">
+                <div>
+                    <div class="progress-title">📚 今日学习进度</div>
+                    <div class="progress-date" id="currentDate"></div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 2em; font-weight: bold; color: #00d2ff;">
+                        <span id="todayCount">0</span>/20
+                    </div>
+                    <div style="color: #666; font-size: 0.9em;">今日案例</div>
+                </div>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar" style="width: 0%">0%</div>
+            </div>
+            <div class="progress-milestones">
+                <div class="milestone" id="m5">5个 🎯</div>
+                <div class="milestone" id="m10">10个 💪</div>
+                <div class="milestone" id="m15">15个 🔥</div>
+                <div class="milestone" id="m20">20个 🏆</div>
+                <div class="milestone" id="m25">25+ ⭐</div>
+            </div>
+        </div>
+
+        <!-- 分类统计 -->
+        <div class="stats-grid" id="statsGrid">
+            <!-- 动态生成 -->
+        </div>
+
+        <!-- 添加案例按钮 -->
+        <div style="text-align: center; margin-bottom: 20px;">
+            <button onclick="showAddModal()" class="submit-btn" style="max-width: 300px; color: #fff;">
+                ➕ 添加新案例
+            </button>
+        </div>
+
+        <!-- 案例展示 -->
+        <div class="cases-section">
+            <div class="section-header">
+                <h2 class="section-title" id="currentCategoryTitle">全部案例</h2>
+                <span style="color: #888;" id="currentCategoryCount">共 0 个案例</span>
+            </div>
+            <div class="cases-grid" id="casesGrid">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📸</div>
+                    <div>还没有案例，开始添加吧！</div>
+                    <div style="margin-top: 10px; font-size: 0.9em; color: #444;">每日目标：20个案例</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 案例查看模态框 -->
+    <div class="modal" id="viewModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeViewModal()">&times;</span>
+            <img class="modal-image" id="modalImage" src="" alt="">
+            <div class="modal-info" id="modalInfo"></div>
+        </div>
+    </div>
+
+    <!-- 添加案例表单模态框 -->
+    <div class="modal" id="addModal">
+        <div class="modal-content" style="background: rgba(30,30,40,0.98); padding: 30px; border-radius: 15px; max-width: 500px;">
+            <span class="modal-close" onclick="closeAddModal()">&times;</span>
+            <h2 style="margin-bottom: 20px; color: #00d2ff;">📸 添加K线案例</h2>
+            <form id="caseForm" onsubmit="submitCase(event)">
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; color: #aaa;">📌 股票代码/名称</label>
+                    <input type="text" id="stockCode" placeholder="如：000001 平安银行" required style="width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff;">
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; color: #aaa;">🏷️ 形态分类</label>
+                    <select id="pattern" required style="width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff;">
+                        <option value="">-- 选择形态 --</option>
+                        <option value="双底">📐 双底</option>
+                        <option value="左峰突破">⛰️ 左峰突破</option>
+                        <option value="阳阴阳">☀️ 阳阴阳</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; color: #aaa;">🖼️ K线截图</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="file" id="imageFile" accept="image/*" onchange="previewImage(this)" required style="display: none;">
+                        <button type="button" onclick="document.getElementById('imageFile').click()" style="padding: 10px 20px; border: 1px dashed rgba(255,255,255,0.3); background: rgba(255,255,255,0.05); color: #aaa; border-radius: 8px; cursor: pointer;">📁 选择图片</button>
+                        <span id="fileName" style="color: #888; font-size: 0.9em;">未选择文件</span>
+                    </div>
+                    <img id="previewImg" style="max-width: 100%; max-height: 150px; border-radius: 8px; display: none; margin-top: 10px;">
+                    <button type="button" id="identifyBtn" onclick="askClaudeIdentify()" style="display: none; margin-top: 10px; padding: 8px 15px; border: 1px solid #00d2ff; background: rgba(0, 210, 255, 0.1); color: #00d2ff; border-radius: 6px; cursor: pointer; font-size: 0.9em;">
+                        🤖 让Claude识别股票名称
+                    </button>
+                    <div id="identifyStatus" style="margin-top: 10px; font-size: 0.85em; color: #00d2ff; display: none;">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; color: #aaa;">📝 特征描述</label>
+                    <textarea id="description" rows="3" placeholder="描述这个K线形态的关键特征..." required style="width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff; resize: vertical;"></textarea>
+                </div>
+                <button type="submit" class="submit-btn">✅ 提交案例</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 成功提示 -->
+    <div class="success-toast" id="toast">✅ 案例添加成功！+1</div>
+
+    <script>
+        // 所有形态分类
+        const ALL_PATTERNS = ['双底', '左峰突破', '阳阴阳'];
+
+        // 案例数据
+        let casesData = [];
+        let currentFilter = 'all';
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', function() {
+            loadFromStorage();
+            updateDate();
+            updateProgress();
+            updateStats();
+            renderCases();
+        });
+
+        // 更新日期
+        function updateDate() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', options);
+        }
+
+        // 加载本地存储
+        function loadFromStorage() {
+            const saved = localStorage.getItem('klineCases');
+            if (saved) {
+                casesData = JSON.parse(saved);
+            }
+        }
+
+        // 保存到本地存储
+        function saveToStorage() {
+            localStorage.setItem('klineCases', JSON.stringify(casesData));
+        }
+
+        // 获取今天的案例
+        function getTodayCases() {
+            const today = new Date().toDateString();
+            return casesData.filter(c => new Date(c.date).toDateString() === today);
+        }
+
+        // 更新进度
+        function updateProgress() {
+            const todayCases = getTodayCases();
+            const count = todayCases.length;
+            const percent = Math.min(Math.round((count / 20) * 100), 100);
+
+            document.getElementById('todayCount').textContent = count;
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressBar').textContent = count >= 20 ? '🎉 完成!' : percent + '%';
+
+            // 更新里程碑
+            document.getElementById('m5').className = 'milestone' + (count >= 5 ? ' reached' : '');
+            document.getElementById('m10').className = 'milestone' + (count >= 10 ? ' reached' : '');
+            document.getElementById('m15').className = 'milestone' + (count >= 15 ? ' reached' : '');
+            document.getElementById('m20').className = 'milestone' + (count >= 20 ? ' reached' : '');
+            document.getElementById('m25').className = 'milestone' + (count >= 25 ? ' reached' : '');
+
+            // 完成20个时的庆祝效果
+            if (count === 20) {
+                celebrate();
+            }
+        }
+
+        // 更新统计卡片
+        function updateStats() {
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = '';
+
+            // 全部
+            statsGrid.innerHTML += `
+                <div class="stat-card ${currentFilter === 'all' ? 'active' : ''}" onclick="filterByPattern('all')">
+                    <div class="stat-number">${casesData.length}</div>
+                    <div class="stat-label">📊 全部</div>
+                </div>
+            `;
+
+            // 各形态统计
+            const patternCounts = {};
+            casesData.forEach(c => {
+                patternCounts[c.pattern] = (patternCounts[c.pattern] || 0) + 1;
+            });
+
+            ALL_PATTERNS.forEach(pattern => {
+                const count = patternCounts[pattern] || 0;
+                statsGrid.innerHTML += `
+                    <div class="stat-card ${currentFilter === pattern ? 'active' : ''}" onclick="filterByPattern('${pattern}')">
+                        <div class="stat-number">${count}</div>
+                        <div class="stat-label">${pattern}</div>
+                    </div>
+                `;
+            });
+        }
+
+        // 按形态筛选
+        function filterByPattern(pattern) {
+            currentFilter = pattern;
+            document.getElementById('currentCategoryTitle').textContent =
+                pattern === 'all' ? '全部案例' : pattern + ' 案例';
+            updateStats();
+            renderCases();
+        }
+
+        // 渲染案例
+        function renderCases() {
+            const grid = document.getElementById('casesGrid');
+            const filtered = currentFilter === 'all' ?
+                casesData :
+                casesData.filter(c => c.pattern === currentFilter);
+
+            document.getElementById('currentCategoryCount').textContent = `共 ${filtered.length} 个案例`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📸</div>
+                        <div>${currentFilter === 'all' ? '还没有案例，开始添加吧！' : '该分类暂无案例'}</div>
+                        <div style="margin-top: 10px; font-size: 0.9em; color: #444;">每日目标：20个案例</div>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = '';
+            // 按时间倒序
+            const sorted = [...filtered].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            sorted.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'case-card';
+                card.innerHTML = `
+                    <img class="case-image" src="${item.url}" alt="${item.pattern}" data-id="${item.id}">
+                    <div class="case-content">
+                        <span class="case-tag">${item.pattern}</span>
+                        <div class="case-pattern">${item.stock_code}</div>
+                        <div class="case-desc">${item.description}</div>
+                        <div class="case-date">${new Date(item.date).toLocaleString('zh-CN')}</div>
+                    </div>
+                    <button class="case-delete-btn" onclick="deleteCase('${item.id}', event)" title="删除案例">🗑️</button>
+                `;
+                card.querySelector('.case-image').addEventListener('click', () => openModal(item.id));
+                grid.appendChild(card);
+            });
+        }
+
+        // 图片预览并自动识别
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                document.getElementById('fileName').textContent = file.name + ' (识别中...)';
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('previewImg');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+
+                    // 保存图片数据供识别
+                    currentUploadedImage = e.target.result;
+
+                    // 立即开始识别
+                    autoIdentifyStock(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 当前上传的图片数据
+        let currentUploadedImage = null;
+
+        // 自动识别股票名称
+        async function autoIdentifyStock(imageDataUrl) {
+            const fileNameEl = document.getElementById('fileName');
+            const originalFileName = fileNameEl.textContent.replace(' (识别中...)', '');
+
+            // 保存图片数据到localStorage
+            const identifyData = {
+                action: 'identify_stock',
+                image: imageDataUrl,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('__claude_identify_request__', JSON.stringify(identifyData));
+
+            // 显示识别中状态
+            document.getElementById('identifyStatus').innerHTML = `
+                🤖 正在自动识别股票名称...
+            `;
+            document.getElementById('identifyStatus').style.display = 'block';
+
+            // 触发一个特殊标记，让Claude知道需要识别
+            localStorage.setItem('__claude_trigger__', Date.now().toString());
+
+            // 3秒后如果还没识别，显示手动提示
+            setTimeout(() => {
+                const statusEl = document.getElementById('identifyStatus');
+                if (statusEl && statusEl.innerHTML.includes('正在自动识别')) {
+                    statusEl.innerHTML = `
+                        💡 请告诉Claude：<code>识别图片</code>
+                    `;
+                }
+            }, 3000);
+        }
+
+        // ===== Claude专用函数 =====
+        // 这个函数让Claude能够读取并识别图片
+
+        // Claude调用：获取待识别的图片
+        window.__claudeGetPendingImage = function() {
+            try {
+                const data = localStorage.getItem('__claude_identify_request__');
+                if (data) {
+                    return JSON.parse(data);
+                }
+                return null;
+            } catch (e) {
+                return null;
+            }
+        };
+
+        // Claude调用：设置识别结果
+        window.__claudeSetIdentifyResult = function(stockName, confidence) {
+            try {
+                localStorage.setItem('__claude_identify_result__', JSON.stringify({
+                    stockName: stockName,
+                    confidence: confidence || 'medium'
+                }));
+                return true;
+            } catch (e) {
+                return false;
+            }
+        };
+
+        // 定期检查识别结果
+        setInterval(function() {
+            const result = localStorage.getItem('__claude_identify_result__');
+            if (result) {
+                const data = JSON.parse(result);
+                if (data.stockName) {
+                    document.getElementById('stockCode').value = data.stockName;
+                    const statusEl = document.getElementById('identifyStatus');
+                    if (statusEl) {
+                        statusEl.innerHTML = `✅ 已识别: ${data.stockName}`;
+                        statusEl.style.display = 'block';
+                    }
+                    const fileNameEl = document.getElementById('fileName');
+                    if (fileNameEl) {
+                        fileNameEl.textContent = fileNameEl.textContent.replace(' (待识别)', '').replace(' (识别中...)', '') + ' ✓';
+                    }
+                    localStorage.removeItem('__claude_identify_result__');
+                }
+            }
+
+            // 自动检查是否有新图片需要识别
+            const trigger = localStorage.getItem('__claude_trigger__');
+            if (trigger) {
+                const requestData = localStorage.getItem('__claude_identify_request__');
+                if (requestData) {
+                    // 在页面上显示一个明显的提示
+                    const statusEl = document.getElementById('identifyStatus');
+                    if (statusEl) {
+                        statusEl.innerHTML = `
+                            📸 图片已上传！<br>
+                            <strong style="color: #2ed573;">请在Claude对话框中输入：</strong><br>
+                            <code style="background: rgba(0,0,0,0.3); padding: 6px 10px; border-radius: 4px; color: #2ed573; font-size: 1.1em;">识别图片</code>
+                        `;
+                        statusEl.style.display = 'block';
+                    }
+                }
+            }
+        }, 1000);
+
+        // ===== Claude专用函数结束 =====
+
+        // 删除案例
+        function deleteCase(id, event) {
+            event.stopPropagation();
+
+            if (!confirm('确定要删除这个案例吗？')) {
+                return;
+            }
+
+            // 从数据中删除
+            casesData = casesData.filter(c => c.id !== id);
+            saveToStorage();
+            updateProgress();
+            updateStats();
+            renderCases();
+
+            // 显示提示
+            showToast('🗑️ 案例已删除');
+        }
+
+        // 显示提示（重载以支持自定义消息）
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message || '✅ 案例添加成功！+1';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // 提交案例
+        function submitCase(event) {
+            event.preventDefault();
+
+            const stockCode = document.getElementById('stockCode').value.trim();
+            const pattern = document.getElementById('pattern').value;
+            const description = document.getElementById('description').value.trim();
+            const imageFile = document.getElementById('imageFile').files[0];
+
+            if (!imageFile) {
+                alert('请上传K线截图');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const newCase = {
+                    id: Date.now().toString(),
+                    url: e.target.result,
+                    pattern: pattern,
+                    stock_code: stockCode,
+                    description: description,
+                    date: new Date().toISOString()
+                };
+
+                casesData.unshift(newCase);
+                saveToStorage();
+                updateProgress();
+                updateStats();
+                renderCases();
+
+                // 重置表单并关闭模态框
+                closeAddModal();
+
+                // 显示成功提示
+                showToast();
+
+                // 滚动到案例区
+                document.querySelector('.cases-section').scrollIntoView({ behavior: 'smooth' });
+            };
+            reader.readAsDataURL(imageFile);
+        }
+
+        // 显示提示
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // 查看案例模态框
+        function openModal(id) {
+            const item = casesData.find(c => c.id === id);
+            if (!item) return;
+
+            document.getElementById('modalImage').src = item.url;
+            document.getElementById('modalInfo').innerHTML = `
+                <h3>${item.pattern} - ${item.stock_code}</h3>
+                <p style="margin-top: 10px; color: #aaa;">${item.description}</p>
+                <p style="margin-top: 10px; color: #666; font-size: 0.9em;">${new Date(item.date).toLocaleString('zh-CN')}</p>
+            `;
+            document.getElementById('viewModal').classList.add('active');
+        }
+
+        function closeViewModal() {
+            document.getElementById('viewModal').classList.remove('active');
+        }
+
+        // 添加案例模态框
+        function showAddModal() {
+            document.getElementById('addModal').classList.add('active');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.remove('active');
+            document.getElementById('caseForm').reset();
+            document.getElementById('previewImg').style.display = 'none';
+            document.getElementById('fileName').textContent = '未选择文件';
+        }
+
+        // 点击模态框外部关闭
+        document.getElementById('viewModal').addEventListener('click', function(e) {
+            if (e.target === this) closeViewModal();
+        });
+
+        document.getElementById('addModal').addEventListener('click', function(e) {
+            if (e.target === this) closeAddModal();
+        });
+
+        // 庆祝效果
+        function celebrate() {
+            // 简单的庆祝提示
+            alert('🎉 恭喜！已完成今日20个案例目标！\n继续保持，成为K线大师！');
+        }
+    </script>
+</body>
+</html>
