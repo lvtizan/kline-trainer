@@ -19,6 +19,8 @@
 
 **在线访问**: https://lvtizan.github.io/kline-trainer/kline-cases.html
 
+**仓库地址**: https://github.com/lvtizan/kline-trainer
+
 或本地打开:
    ```
    kline-cases.html
